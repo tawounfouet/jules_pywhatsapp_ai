@@ -6,16 +6,23 @@ from pydantic import ValidationError
 from whatsapp_ai.config import WhatsAppConfig
 from whatsapp_ai.models import MessageEvent, WebhookPayload
 from whatsapp_ai.router import MessageRouter
+from whatsapp_ai.mail_bridge import MailBridge
 
 logger = logging.getLogger(__name__)
 
 
 class WebhookReceiver:
-    """FastAPI webhook receiver for WhatsApp Cloud API."""
+    """FastAPI webhook receiver for WhatsApp Cloud API and Email Integrations."""
 
-    def __init__(self, config: WhatsAppConfig, router: MessageRouter):
+    def __init__(
+        self,
+        config: WhatsAppConfig,
+        router: MessageRouter,
+        mail_bridge: MailBridge | None = None,
+    ):
         self.config = config
         self.msg_router = router
+        self.mail_bridge = mail_bridge
         self.api_router = APIRouter()
         self._setup_routes()
 
@@ -92,4 +99,6 @@ class WebhookReceiver:
         """Return a FastAPI app containing the webhook routes."""
         app = FastAPI(title="WhatsApp AI Webhook", version="0.1.0")
         app.include_router(self.api_router)
+        if self.mail_bridge:
+            app.include_router(self.mail_bridge.router)
         return app

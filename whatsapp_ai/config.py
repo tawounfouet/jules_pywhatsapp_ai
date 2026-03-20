@@ -15,6 +15,10 @@ class WhatsAppConfig(BaseSettings):
     # Provider APIs
     openai_api_key: str | None = Field(None, description="OpenAI API Key")
 
+    # Mail Bridge Webhook Security
+    mailgun_signing_key: str | None = Field(None, description="Mailgun API Key for HMAC verification")
+    resend_webhook_secret: str | None = Field(None, description="Resend Webhook Secret for HMAC verification")
+
     # App Config
     webhook_host: str = Field("0.0.0.0", description="Host to bind the webhook server")
     webhook_port: int = Field(8000, description="Port to bind the webhook server")
