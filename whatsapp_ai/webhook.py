@@ -87,6 +87,12 @@ class WebhookReceiver:
                             timestamp=msg.timestamp,
                             raw_payload=msg.model_dump(),
                         )
+                        if self.config.auto_mark_read:
+                            try:
+                                await self.msg_router.client.mark_message_as_read(msg.id)
+                            except Exception as e:
+                                logger.error(f"Failed to mark message as read: {e}")
+
                         # We route the message asynchronously but do not await here
                         # to ensure we return 200 OK fast.
                         # However, for simplicity and testing in FastAPI, we await here.

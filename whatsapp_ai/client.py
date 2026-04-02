@@ -35,6 +35,32 @@ class BaseMessagingClient(ABC):
         """Send a template message."""
         pass
 
+    @abstractmethod
+    async def send_media_message(
+        self,
+        to: str,
+        media_type: str,
+        media_link: Optional[str] = None,
+        media_id: Optional[str] = None,
+        caption: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Send a media message (image, document, audio, video, sticker)."""
+        pass
+
+    @abstractmethod
+    async def send_interactive_message(
+        self,
+        to: str,
+        interactive_data: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """Send an interactive message (buttons, lists, product)."""
+        pass
+
+    @abstractmethod
+    async def mark_message_as_read(self, message_id: str) -> Dict[str, Any]:
+        """Mark an incoming message as read."""
+        pass
+
 
 class WhatsAppClient(BaseMessagingClient):
     """WhatsApp Cloud API client implementation."""
@@ -92,6 +118,59 @@ class WhatsAppClient(BaseMessagingClient):
             "to": to,
             "type": "text",
             "text": {"preview_url": False, "body": text},
+        }
+        return await self._post(payload)
+
+    async def send_media_message(
+        self,
+        to: str,
+        media_type: str,
+        media_link: Optional[str] = None,
+        media_id: Optional[str] = None,
+        caption: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Send a media message (image, document, audio, video, sticker)."""
+        if not media_link and not media_id:
+            raise ValueError("Either media_link or media_id must be provided")
+
+        media_obj: Dict[str, Any] = {}
+        if media_link:
+            media_obj["link"] = media_link
+        if media_id:
+            media_obj["id"] = media_id
+        if caption and media_type in ["image", "video", "document"]:
+            media_obj["caption"] = caption
+
+        payload = {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": to,
+            "type": media_type,
+            media_type: media_obj,
+        }
+        return await self._post(payload)
+
+    async def send_interactive_message(
+        self,
+        to: str,
+        interactive_data: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        """Send an interactive message (buttons, lists, product)."""
+        payload = {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": to,
+            "type": "interactive",
+            "interactive": interactive_data,
+        }
+        return await self._post(payload)
+
+    async def mark_message_as_read(self, message_id: str) -> Dict[str, Any]:
+        """Mark an incoming message as read."""
+        payload = {
+            "messaging_product": "whatsapp",
+            "status": "read",
+            "message_id": message_id,
         }
         return await self._post(payload)
 

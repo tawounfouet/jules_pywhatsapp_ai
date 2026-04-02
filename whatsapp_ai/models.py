@@ -6,12 +6,34 @@ from pydantic import BaseModel, Field
 class WhatsAppMessageText(BaseModel):
     body: str
 
+class WhatsAppMessageMedia(BaseModel):
+    id: Optional[str] = None
+    link: Optional[str] = None
+    caption: Optional[str] = None
+    mime_type: Optional[str] = None
+
+class WhatsAppMessageInteractiveReply(BaseModel):
+    id: str
+    title: Optional[str] = None
+    description: Optional[str] = None
+
+class WhatsAppMessageInteractive(BaseModel):
+    type: str
+    button_reply: Optional[WhatsAppMessageInteractiveReply] = None
+    list_reply: Optional[WhatsAppMessageInteractiveReply] = None
+
 class WhatsAppMessage(BaseModel):
     from_: str = Field(alias="from")
     id: str
     timestamp: str
-    text: Optional[WhatsAppMessageText] = None
     type: str
+    text: Optional[WhatsAppMessageText] = None
+    image: Optional[WhatsAppMessageMedia] = None
+    video: Optional[WhatsAppMessageMedia] = None
+    audio: Optional[WhatsAppMessageMedia] = None
+    document: Optional[WhatsAppMessageMedia] = None
+    sticker: Optional[WhatsAppMessageMedia] = None
+    interactive: Optional[WhatsAppMessageInteractive] = None
 
 class WhatsAppContactProfile(BaseModel):
     name: str

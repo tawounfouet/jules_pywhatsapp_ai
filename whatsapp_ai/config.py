@@ -22,6 +22,7 @@ class WhatsAppConfig(BaseSettings):
     # App Config
     webhook_host: str = Field("0.0.0.0", description="Host to bind the webhook server")
     webhook_port: int = Field(8000, description="Port to bind the webhook server")
+    auto_mark_read: bool = Field(True, description="Automatically mark incoming messages as read")
 
     model_config = SettingsConfigDict(
         env_file=".env",
